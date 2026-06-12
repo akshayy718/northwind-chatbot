@@ -64,6 +64,10 @@ pip install -r requirements.txt
 ```
 
 **Step 3: Create `.env` file**
+```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
 **Step 4: Configure SQL Server in `config.py`**
 ```python
 DATABASE_CONFIG = {
@@ -80,7 +84,10 @@ python chatbot.py
 ```
 
 **Step 6: Open in browser**
+```
 http://localhost:7860
+```
+
 ---
 
 ## 💬 Example Questions
@@ -96,9 +103,38 @@ http://localhost:7860
 ---
 
 ## 📁 Project Structure
+
+```
+northwind-chatbot/
+├── chatbot.py          # Main chatbot application
+├── config.py           # Database configuration
+├── requirements.txt    # Python dependencies
+├── instnwnd.sql        # Northwind database setup script
+├── .gitignore          # Git ignore rules
+├── screenshots/        # Output screenshots
+└── README.md           # Project documentation
+```
+
 ---
 
 ## 🔧 How It Works
+
+```
+User Question
+     ↓
+LangChain + Groq LLM
+     ↓
+SQL Query Generated
+     ↓
+Microsoft SQL Server
+     ↓
+Results Fetched
+     ↓
+Natural Language Answer
+     ↓
+Gradio UI Display
+```
+
 ---
 
 ## 👨‍💻 Author
@@ -106,3 +142,4 @@ http://localhost:7860
 **Akshay Santhosh**
 - GitHub: [@akshayy718](https://github.com/akshayy718)
 - Email: akshaysanthosh718@gmail.com
+- 
