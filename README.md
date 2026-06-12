@@ -4,17 +4,6 @@ An AI-powered chatbot that converts natural language questions into SQL queries 
 
 ---
 
-## 📸 Screenshots
-
-![Screenshot1](screenshots/Screenshot%202026-06-11%20135228.png)
-![Screenshot2](screenshots/Screenshot%202026-06-11%20135257.png)
-![Screenshot3](screenshots/Screenshot%202026-06-11%20135314.png)
-![Screenshot4](screenshots/Screenshot%202026-06-11%20135340.png)
-![Screenshot5](screenshots/Screenshot%202026-06-11%20135410.png)
-![Screenshot6](screenshots/Screenshot%202026-06-11%20135503.png)
-
----
-
 ## 🛠️ Tech Stack
 
 | Technology | Purpose |
@@ -134,6 +123,15 @@ Natural Language Answer
      ↓
 Gradio UI Display
 ```
+---
+## 📸 Screenshots
+
+![Screenshot1](screenshots/Screenshot%202026-06-11%20135228.png)
+![Screenshot2](screenshots/Screenshot%202026-06-11%20135257.png)
+![Screenshot3](screenshots/Screenshot%202026-06-11%20135314.png)
+![Screenshot4](screenshots/Screenshot%202026-06-11%20135340.png)
+![Screenshot5](screenshots/Screenshot%202026-06-11%20135410.png)
+![Screenshot6](screenshots/Screenshot%202026-06-11%20135503.png)
 
 ---
 
