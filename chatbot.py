@@ -1,11 +1,9 @@
 import os
 import re
-import urllib
 from dotenv import load_dotenv
 import gradio as gr
 
-from sqlalchemy import create_engine, text
-
+from sqlalchemy import text
 from langchain_groq import ChatGroq
 from langchain_community.utilities import SQLDatabase
 from langchain_core.prompts import PromptTemplate
@@ -17,49 +15,17 @@ from langchain_core.runnables import RunnablePassthrough
 load_dotenv()
 
 # -----------------------------
-# Database setup
+# Database setup - SQLite only for HF deployment
 # -----------------------------
-db_path = None
+db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "northwind.db")
 
-try:
-    from config import DATABASE_CONFIG
+if not os.path.exists(db_path):
+    raise FileNotFoundError(f"northwind.db not found at {db_path}")
 
-    if DATABASE_CONFIG.get("username") and DATABASE_CONFIG.get("password"):
-        params = urllib.parse.quote_plus(
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-            f"SERVER={DATABASE_CONFIG['server']};"
-            f"DATABASE={DATABASE_CONFIG['database']};"
-            f"UID={DATABASE_CONFIG['username']};"
-            f"PWD={DATABASE_CONFIG['password']};"
-        )
-    else:
-        params = urllib.parse.quote_plus(
-            f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-            f"SERVER={DATABASE_CONFIG['server']};"
-            f"DATABASE={DATABASE_CONFIG['database']};"
-            f"Trusted_Connection=yes;"
-        )
-
-    engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
-    db = SQLDatabase(engine)
-    print("✅ Connected to SQL Server")
-
-except ImportError:
-    print("⚠️ config.py not found - Using SQLite (demo mode)")
-    db_path = os.path.join(os.getcwd(), "northwind.db")
-
-    if not os.path.exists(db_path):
-        raise FileNotFoundError(f"Database not found at {db_path}")
-
-    db = SQLDatabase.from_uri(f"sqlite:///{db_path}")
-    print(f"✅ Database loaded from: {db_path}")
-
-# -----------------------------
-# Detect database dialect
-# -----------------------------
-url = str(db._engine.url).lower()
-DB_DIALECT = "sqlserver" if "mssql" in url else "sqlite"
-print("🗄️ Database dialect:", DB_DIALECT)
+db = SQLDatabase.from_uri(f"sqlite:///{db_path}")
+DB_DIALECT = "sqlite"
+print(f"✅ Database loaded from: {db_path}")
+print(f"🗄️ Database dialect: {DB_DIALECT}")
 
 # -----------------------------
 # Initialize LLM
@@ -74,21 +40,18 @@ llm = ChatGroq(
 # -----------------------------
 sql_prompt = PromptTemplate.from_template(
     """
-You are a SQL expert.
+You are a SQL expert for the Northwind SQLite database.
 
-Given a natural language question, write a valid SQL SELECT query
-for the Northwind database.
-
-Database type: {dialect}
+The database has these tables:
+- Customers: CustomerID, CompanyName, ContactName, City, Country, Phone
+- Products: ProductID, ProductName, Category, UnitPrice, UnitsInStock
+- Orders: OrderID, CustomerID, OrderDate, ShipCity, ShipCountry
 
 Rules:
-- Use correct table and column names
-- If database type is:
-  - sqlite → use STRFTIME for dates
-  - sqlserver → use YEAR(), MONTH(), DAY()
+- Use STRFTIME('%Y', OrderDate) for year filtering
+- Use STRFTIME('%m', OrderDate) for month filtering
 - ONLY generate SELECT queries
-- Return ONLY the SQL query
-- Do NOT explain anything
+- Return ONLY the raw SQL, no explanation, no markdown, no backticks
 
 Question: {question}
 """
@@ -104,7 +67,7 @@ def extract_sql(response):
     sql = re.sub(r"```sql|```", "", sql, flags=re.IGNORECASE)
     match = re.search(r"(select\s+.*)", sql, re.IGNORECASE | re.DOTALL)
     if not match:
-        raise ValueError("No SELECT query generated")
+        raise ValueError("No SELECT query found in response")
     return match.group(1).strip().rstrip(";") + ";"
 
 
@@ -112,14 +75,13 @@ def sql_to_markdown(sql: str) -> str:
     with db._engine.connect() as conn:
         result = conn.execute(text(sql))
         rows = result.fetchall()
-        cols = result.keys()
+        cols = list(result.keys())
 
     if not rows:
         return "No data found."
 
     md = "| " + " | ".join(cols) + " |\n"
     md += "| " + " | ".join(["---"] * len(cols)) + " |\n"
-
     for row in rows:
         md += "| " + " | ".join(str(v) for v in row) + " |\n"
 
@@ -130,23 +92,18 @@ def sql_to_markdown(sql: str) -> str:
 # -----------------------------
 def chat_with_database(question: str):
     try:
-        response = query_chain.invoke({
-            "question": question,
-            "dialect": DB_DIALECT
-        })
-
+        response = query_chain.invoke({"question": question})
         sql_query = extract_sql(response)
         print("🔹 Generated SQL:", sql_query)
 
-        # Safety guard
         forbidden = ("drop", "delete", "update", "insert", "alter", "truncate")
         if any(word in sql_query.lower() for word in forbidden):
             return "❌ This operation is not allowed."
 
         return sql_to_markdown(sql_query)
 
-    except Exception:
-        return "❌ I couldn’t answer that question due to a database error."
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
 
 # -----------------------------
 # Gradio UI
@@ -155,24 +112,21 @@ demo = gr.Interface(
     fn=chat_with_database,
     inputs=gr.Textbox(
         label="Ask a question about the Northwind database",
-        placeholder="e.g., Who ordered in 1997?",
+        placeholder="e.g., Show all customers from Germany",
         lines=3
     ),
     outputs=gr.Markdown(label="Result"),
     title="🤖 Northwind Database Chatbot",
     description="All answers are shown as tables.",
     examples=[
-        "Who ordered in 1997?",
-        "How many orders were placed in 1997?",
         "Show all customers from Germany",
         "Top 5 most expensive products",
-        "List all products in the Beverages category"
+        "List all products in the Beverages category",
+        "How many orders were placed in 2024?",
+        "Show all orders from July 2024"
     ]
 )
 
-# -----------------------------
-# Main
-# -----------------------------
 if __name__ == "__main__":
     print("🚀 Starting Northwind Chatbot...")
     demo.launch(server_name="0.0.0.0", server_port=7860)
