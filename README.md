@@ -258,6 +258,9 @@ Open → `http://localhost:7860`
 "Which employee has handled the most orders?"
 "List all suppliers based in the USA"
 "What is the average order value per customer?"
+
+
+
 ```
 
 ---
