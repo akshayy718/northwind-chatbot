@@ -20,8 +20,19 @@
  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═════╝  ╚═════╝    ╚═╝  
 </pre>
 
-### 🚀 Live Demo → **[huggingface.co/spaces/Akshay718/northwind-chatbot](https://huggingface.co/spaces/Akshay718/northwind-chatbot)**
+## 🔗 Live Demo
 
+<div align="center">
+
+| | Link | Description |
+|--|------|-------------|
+| 🤗 | [**huggingface.co/spaces/Akshay718/northwind-chatbot**](https://huggingface.co/spaces/Akshay718/northwind-chatbot) | Try the chatbot live — no setup needed |
+
+</div>
+
+> ⚠️ **Note:** Hosted on Hugging Face's free tier — if idle, the Space may take 15–30 seconds to wake up on first load. Subsequent queries respond instantly.
+
+---
 [![Live Demo](https://img.shields.io/badge/▶_Try_Live_Demo-Hugging_Face_Spaces-FF7C00?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/spaces/Akshay718/northwind-chatbot)
 [![GitHub](https://img.shields.io/badge/GitHub-akshayy718-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/akshayy718/northwind-chatbot)
 [![Groq AI](https://img.shields.io/badge/🤖_Groq_AI-llama--3.3--70b-FFA500?style=for-the-badge)](https://console.groq.com)
