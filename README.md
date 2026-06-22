@@ -255,6 +255,9 @@ Open → `http://localhost:7860`
 "What is the total revenue from all orders?"
 "Who are the top 10 customers by number of orders?"
 "Show all products in the Beverages category"
+"Which employee has handled the most orders?"
+"List all suppliers based in the USA"
+"What is the average order value per customer?"
 ```
 
 ---
